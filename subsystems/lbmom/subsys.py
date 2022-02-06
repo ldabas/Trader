@@ -1,5 +1,7 @@
+from dis import Instruction
 import json
 import quantlib.indicators_cal as indicators_cal
+import pandas as pd
 
 
 # hangukquant volatility targeting the asset level
@@ -18,13 +20,38 @@ class Lbmom():
 
     def extend_historical(self, instruments, historical_data):
         for inst in instruments:
-            pass
-            #Need to add a calculator for moving average
+            historical_data[f"{inst} adx"]=indicators_cal.adx_series(
+                high = historical_data[inst + " high"],
+                low = historical_data[inst + " low"],
+                close = historical_data[inst + " close"],
+                n = 14
+            )
+
+            for pair in self.pairs:
+                historical_data[f"{inst} ema{str(pair)}"]= indicators_cal.ema_series(
+                    series = historical_data[inst + " close"],
+                    n = pair[0]
+                ) - indicators_cal.ema_series(
+                    series = historical_data[inst + " close"],
+                    n = pair[1]
+                )#fastMA - slowMA
 
         return historical_data
 
     def run_simulation(self, historical_data):
+        #init parameters
+        instruments = self.instruments_config["instruments"]
+        #calculate indicators
+        historical_data = self.extend_historical(instruments=instruments, historical_data=historical_data)
+        #perform simlation
+        portfolio_df = pd.DataFrame(index=historical_data[self.simulation_start:].index).reset_index()
+
+        print(portfolio_df)
+
+        
+        
         pass
     
     def get_subsys_pos(self):
-        pass
+        self.run_simulation(historical_data=self.historical_df)
+

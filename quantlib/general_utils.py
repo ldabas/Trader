@@ -14,7 +14,6 @@ def load_file(path):
     try:
         with open(path, "rb") as fp:
             file = pickle.load(fp)
-            input(file)
 
         return file
 
